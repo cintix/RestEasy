@@ -332,18 +332,12 @@ namespace RestEasy.Web {
                     }
 
                     if (_base == "/") _base = "";
-
-                    if (actionPath.Equals("/")){
-
-                        String urlPatternWithoutAction = CompileRegexFromPath(_base);
-                        httpMethods.Add(urlPatternWithoutAction, new Endpoint(_base, method, endpoint));
-                        httpMethods.Add(_base, new Endpoint(_base, method, endpoint));
-                        pathMapping[httpMethod] = httpMethods;
-
-                    }
-
                     String urlPattern = CompileRegexFromPath(_base + actionPath);
                     httpMethods.Add(urlPattern, new Endpoint(_base + actionPath, method, endpoint));
+                    if (actionPath.Trim() == "/") {
+                        urlPattern = CompileRegexFromPath(_base);
+                        httpMethods.Add(urlPattern, new Endpoint(_base + actionPath, method, endpoint));
+                    }
                     httpMethods.Add(_base + actionPath, new Endpoint(_base + actionPath, method, endpoint));
                     pathMapping[httpMethod] = httpMethods;
 
