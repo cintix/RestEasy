@@ -22,8 +22,9 @@ namespace RestEasy.Web {
 
         public string ContextPath { get; set; } = "";
 
-        public Request(Socket clientSocket, string serverName, byte[] clientRequestData){
-
+        public Request(Socket clientSocket, string serverName, byte[] clientRequestData)
+        {
+            if (clientSocket == null) return;
             try {
                 string[] clientInfo = clientSocket.RemoteEndPoint.ToString().Split(":");
                 ClientIP = clientInfo[0];

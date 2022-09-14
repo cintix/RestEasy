@@ -2,9 +2,9 @@ using System.Text;
 using RestEasy.IO;
 namespace RestEasy.Web {
     public class SessionManager {
-        private readonly static byte[] _keys = Encoding.UTF8.GetBytes(" 4yregIcUNorupOvadIFYlUREDiTURURevyXULeNUNYqopajuVUKaCOBiHUMaReNoWENUlArImexulICIKIqIcikECyVAFylOBaJYgyGEwEGIcaGIjapevYXIfUFivyxixeRURUBOSehiLEnOvEHyxODuHyHoTARiDOpivaZUtedEHoCUHeNUJElasaHYWIwOsORiGIGuGYBoQaXIqAlIPulUluVUhygAtugysYhugosYpalIjAfUDyWaVYCuDIb]");
-        private static Dictionary<string, SessionItem> _session = new Dictionary<string, SessionItem>();
-        private static Random _random = new Random();
+        private static readonly byte[] _keys = Encoding.UTF8.GetBytes(" 4yregIcUNorupOvadIFYlUREDiTURURevyXULeNUNYqopajuVUKaCOBiHUMaReNoWENUlArImexulICIKIqIcikECyVAFylOBaJYgyGEwEGIcaGIjapevYXIfUFivyxixeRURUBOSehiLEnOvEHyxODuHyHoTARiDOpivaZUtedEHoCUHeNUJElasaHYWIwOsORiGIGuGYBoQaXIqAlIPulUluVUhygAtugysYhugosYpalIjAfUDyWaVYCuDIb]");
+        private static readonly Dictionary<string, SessionItem> _session = new Dictionary<string, SessionItem>();
+        private static readonly Random _random = new Random();
 
         public static long TimeOut { get; set; } = 1000 * 60 * 10;
 
@@ -17,7 +17,7 @@ namespace RestEasy.Web {
             return clientSessionKey;
         }
         
-        public static void Set(string clientIP, string sessionKey, object obj){
+        public static void Set(string clientIP, string sessionKey, object? obj){
             byte[] encryptedData = Convert.FromBase64String(sessionKey);
             byte[] clientKeyData = Crypt(encryptedData);
             string clientKey = Encoding.UTF8.GetString(clientKeyData);
@@ -33,8 +33,8 @@ namespace RestEasy.Web {
             byte[] clientKeyData = Crypt(encryptedData);
             string clientKey = Encoding.UTF8.GetString(clientKeyData);
             if (_session.ContainsKey(clientKey)) {
-                object obj  = _session[clientKey].SessionObject;
-                return (T) obj;
+                object? obj  = _session[clientKey].SessionObject;
+                return (T) obj!;
             }
             return default;
         }

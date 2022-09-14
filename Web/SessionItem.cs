@@ -2,11 +2,11 @@ namespace RestEasy.Web {
     public class SessionItem {
         private object? sessionObject;
         private DateTime createdAt = DateTime.Now;
-        public SessionItem(object sessionObject){
+        public SessionItem(object? sessionObject){
             this.sessionObject = sessionObject;
         }
 
-        public object SessionObject
+        public object? SessionObject
         {
             get => sessionObject;
             set => sessionObject = value ?? throw new ArgumentNullException(nameof(value));

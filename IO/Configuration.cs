@@ -1,7 +1,5 @@
-using System.IO.Enumeration;
-using System.Text;
 namespace RestEasy.IO {
-    public class Configuration {
+    public static class Configuration {
         private static Dictionary<string, string> _Values = new Dictionary<string, string>();
 
         public static void Load(string file){

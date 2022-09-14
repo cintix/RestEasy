@@ -192,6 +192,7 @@ namespace RestEasy.Web {
                 clientSocket.Close();
             }
         }
+
         private bool IsRequestADocument(string context){
             
             /*
