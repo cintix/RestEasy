@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.0.2</PackageVersion>
+    <PackageVersion>1.0.3</PackageVersion>
     <Authors>Cintix</Authors>
     <Description>Simple Rest API</Description>
     <Copyright>cintixdk</Copyright>
@@ -15,6 +15,7 @@
     <PackageId>Cintix-RestEasy </PackageId>
     <Title>Cintix-RestEasy </Title>
     <PackageLicenseUrl>https://choosealicense.com/licenses/mit/</PackageLicenseUrl>
+    <PackageReleaseNotes>Removed debug in ValueAs</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
