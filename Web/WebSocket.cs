@@ -92,10 +92,7 @@ public class WebSocket
                     clientSocket.Close();
                     return;
                 }
-
-                
-                
-                
+     
                 Response response = new Response();
 
                 clientSocket.Send(response.Build());

@@ -135,7 +135,7 @@ namespace RestEasy.Web {
 
         public Response Document(Request request, string name){
             _contentType = "text/html";
-            string path = Configuration.Get("wwwroot") ?? "";
+            string path = Configuration.Get("wwwroot") ?? ".";
             string file = path + "/" + name;
             if (File.Exists(file)){
                 if (request.Headers.ContainsKey("Cookie")) {

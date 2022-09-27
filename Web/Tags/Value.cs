@@ -1,4 +1,4 @@
-namespace RestEasy.Web.HTML;
+namespace RestEasy.Web.HTML.Tags;
 
 public class Value : Tag {
     public override string startTag(){

@@ -5,12 +5,28 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.0.1</PackageVersion>
+    <PackageVersion>1.0.2</PackageVersion>
     <Authors>Cintix</Authors>
     <Description>Simple Rest API</Description>
     <Copyright>cintixdk</Copyright>
     <PackageProjectUrl>http://www.cintix.dk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/cintix/RestEasy</RepositoryUrl>
+    <AssemblyName>RestEasy </AssemblyName>
+    <PackageId>Cintix-RestEasy </PackageId>
+    <Title>Cintix-RestEasy </Title>
+    <PackageLicenseUrl>https://choosealicense.com/licenses/mit/</PackageLicenseUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestRestEasy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="TestRestEasy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="TestRestEasy\**" />
+  </ItemGroup>
 
 </Project>

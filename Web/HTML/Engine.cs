@@ -24,6 +24,7 @@ public class Engine {
     private static List<string> ReadParamters(string line){
         List<string> parameters = new List<string>();
         int offset = 0;
+        line = line.Replace("'", "\"");
 
         while (offset != -1){
             offset = line.IndexOf("=", offset);
@@ -31,7 +32,7 @@ public class Engine {
                 break;
             }
 
-            int start = line.IndexOf(" ");
+            int start = 0; // line.IndexOf(" ");
             if (start == -1 || start > offset){
                 start = 0;
             }
@@ -44,9 +45,9 @@ public class Engine {
             }
 
             lastMark++;
-
-            parameters.Add(line.Substring(start, lastMark));
-            offset = lastMark;
+            parameters.Add(line.Substring(start, lastMark).Trim());
+            line = line.Substring(lastMark + 1);
+            offset = 0;
         }
 
         return parameters;
