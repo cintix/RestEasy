@@ -9,8 +9,8 @@ using RestEasy.Web.Annotations;
 using RestEasy.Web.Base;
 using RestEasy.Web.Documentation;
 using RestEasy.Web.Generator;
+using RestEasy.Web.Handler;
 using RestEasy.Web.HTML;
-using RestEasy.Web.Injection;
 using Action = RestEasy.Web.Annotations.Action;
 
 namespace RestEasy.Web {
@@ -18,7 +18,7 @@ namespace RestEasy.Web {
         public static readonly Dictionary<string, ModelGenerator> Generators = new Dictionary<string, ModelGenerator>();
         private static Dictionary<string, Dictionary<string, Endpoint>> pathMapping = new Dictionary<string, Dictionary<string, Endpoint>>();
         private readonly Dictionary<string, Documentation.Service> documentationEndpoint = new Dictionary<string, Documentation.Service>();
-        private readonly Dictionary<Handler, HandlerCriteria> injectionHandlers = new Dictionary<Handler, HandlerCriteria>();
+        private readonly Dictionary<Handler.Handler, HandlerCriteria> processHandlers = new Dictionary<Handler.Handler, HandlerCriteria>();
 
         private readonly IPAddress _ipAddress;
         private readonly IPEndPoint _localEndPoint;
@@ -55,8 +55,8 @@ namespace RestEasy.Web {
         }
 
 
-        public void AddHandler(Handler handler, HandlerCriteria criteria) {
-            injectionHandlers.Add(handler,criteria);
+        public void AddHandler(Handler.Handler handler, HandlerCriteria criteria) {
+            processHandlers.Add(handler,criteria);
         }
         
         public Server(int port){
@@ -264,7 +264,7 @@ namespace RestEasy.Web {
 
             contextPath = request.ContextPath;
             Dictionary<string, Endpoint> requestMap = pathMapping[request.Method.ToLower()];
-            RestAction? restAction = LocateEndpoint(request, requestMap, contextPath.Trim());
+            RestAction? restAction = LocateEndpoint(ref request, requestMap, contextPath.Trim());
 
             if (restAction != null) {
                 return restAction.process(request);
@@ -307,7 +307,7 @@ namespace RestEasy.Web {
 
                     if (found) {
                         Type endpointType = mapping[pattern].Object.GetType();
-                        foreach (KeyValuePair<Handler,HandlerCriteria> handlerSet in injectionHandlers) {
+                        foreach (KeyValuePair<Handler.Handler,HandlerCriteria> handlerSet in processHandlers) {
                             foreach (Type type in handlerSet.Value.Types) {
                                 if (endpointType == type) {
                                     HandlerResponse handlerResponse = handlerSet.Key.OnRequested(request);

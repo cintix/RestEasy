@@ -1,9 +1,9 @@
-namespace RestEasy.Web.Injection;
+namespace RestEasy.Web.Handler;
 
 public class HandlerCriteria {
-    public Type[] Types { get; set; }
 
     public HandlerCriteria(params Type[] types) {
         Types = types;
     }
+    public Type[] Types { get; set; }
 }
