@@ -10,13 +10,15 @@ using RestEasy.Web.Base;
 using RestEasy.Web.Documentation;
 using RestEasy.Web.Generator;
 using RestEasy.Web.HTML;
+using RestEasy.Web.Injection;
 using Action = RestEasy.Web.Annotations.Action;
 
 namespace RestEasy.Web {
     public class Server {
-        public static Dictionary<string, ModelGenerator> Generators = new Dictionary<string, ModelGenerator>();
+        public static readonly Dictionary<string, ModelGenerator> Generators = new Dictionary<string, ModelGenerator>();
         private static Dictionary<string, Dictionary<string, Endpoint>> pathMapping = new Dictionary<string, Dictionary<string, Endpoint>>();
         private readonly Dictionary<string, Documentation.Service> documentationEndpoint = new Dictionary<string, Documentation.Service>();
+        private readonly Dictionary<Handler, HandlerCriteria> injectionHandlers = new Dictionary<Handler, HandlerCriteria>();
 
         private readonly IPAddress _ipAddress;
         private readonly IPEndPoint _localEndPoint;
@@ -53,6 +55,10 @@ namespace RestEasy.Web {
         }
 
 
+        public void AddHandler(Handler handler, HandlerCriteria criteria) {
+            injectionHandlers.Add(handler,criteria);
+        }
+        
         public Server(int port){
             _serverName = Dns.GetHostName();
             _ipAddress = IPAddress.Any;
@@ -258,7 +264,7 @@ namespace RestEasy.Web {
 
             contextPath = request.ContextPath;
             Dictionary<string, Endpoint> requestMap = pathMapping[request.Method.ToLower()];
-            RestAction? restAction = LocateEndpoint(requestMap, contextPath.Trim());
+            RestAction? restAction = LocateEndpoint(request, requestMap, contextPath.Trim());
 
             if (restAction != null) {
                 return restAction.process(request);
@@ -267,7 +273,7 @@ namespace RestEasy.Web {
             }
         }
 
-        private RestAction? LocateEndpoint(Dictionary<string, Endpoint> mapping, string contextPath){
+        private RestAction? LocateEndpoint(ref Request request, Dictionary<string, Endpoint> mapping, string contextPath){
             if (mapping.ContainsKey(contextPath)) {
                 return new RestAction(mapping[contextPath], new List<string?>());
             }
@@ -300,6 +306,18 @@ namespace RestEasy.Web {
                     }
 
                     if (found) {
+                        Type endpointType = mapping[pattern].Object.GetType();
+                        foreach (KeyValuePair<Handler,HandlerCriteria> handlerSet in injectionHandlers) {
+                            foreach (Type type in handlerSet.Value.Types) {
+                                if (endpointType == type) {
+                                    HandlerResponse handlerResponse = handlerSet.Key.OnRequested(request);
+                                    request = handlerResponse.Request;
+                                    if (!handlerResponse.GetStatus()) {
+                                        return default;
+                                    }
+                                }
+                            }
+                        }
                         return new RestAction(mapping[pattern], arguments);
                     }
                 }
