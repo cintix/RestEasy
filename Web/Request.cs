@@ -22,7 +22,7 @@ namespace RestEasy.Web {
 
         public string ContextPath { get; set; } = "";
 
-        public Request(Socket clientSocket, string serverName, byte[] clientRequestData)
+        public Request(Socket? clientSocket, string serverName, byte[] clientRequestData)
         {
             if (clientSocket == null) return;
             try {
@@ -35,13 +35,13 @@ namespace RestEasy.Web {
                 int lineCount = lines.Length;
                 int currentLineIndex = 1;
 
-                int indexOfFromData = clientRequest.IndexOf("\r\n\r\n") + 4;
+                int indexOfFromData = clientRequest.IndexOf("\r\n\r\n", StringComparison.Ordinal) + 4;
                 if (indexOfFromData < clientRequest.Length) {
                     RawRequest = clientRequest.Substring(indexOfFromData);
                 }
 
                 if (indexOfFromData == -1) {
-                    indexOfFromData = clientRequest.IndexOf("\n\n") + 2;
+                    indexOfFromData = clientRequest.IndexOf("\n\n", StringComparison.Ordinal) + 2;
                     if (indexOfFromData < clientRequest.Length) {
                         RawRequest = clientRequest.Substring(indexOfFromData);
                     }
@@ -89,6 +89,11 @@ namespace RestEasy.Web {
                         if (keyValue[0].Trim().ToLower().Equals("server")) Server = keyValue[1];
                         if (keyValue[0].Trim().ToLower().Equals("content-type")) ContentType = keyValue[1];
                         Headers.Add(keyValue[0], keyValue[1]);
+                        if (keyValue[0].Trim().ToLower().Equals("host")) {
+                            if (keyValue[1].Trim().Contains(".")) {
+                                Headers.Add("SubDomain", keyValue[1].Trim().Substring(0,keyValue[1].Trim().IndexOf(".", StringComparison.Ordinal) -1));
+                            }
+                        }
                     }
                 }
 
@@ -113,13 +118,13 @@ namespace RestEasy.Web {
                         int dataOffset = sectionEndOffset + 4;
 
                         if (sectionType.Contains("form-data")) {
-                            int nameStart = sectionType.IndexOf("name=") + 6;
-                            int nameLength = sectionType.IndexOf("\"", nameStart) - nameStart;
+                            int nameStart = sectionType.IndexOf("name=", StringComparison.Ordinal) + 6;
+                            int nameLength = sectionType.IndexOf("\"", nameStart, StringComparison.Ordinal) - nameStart;
                             string name = sectionType.Substring(nameStart, nameLength);
 
                             if (sectionType.Contains("filename=")) {
-                                int filenameStart = sectionType.IndexOf("filename=") + 10;
-                                int filenameLength = sectionType.IndexOf("\"", filenameStart) - filenameStart;
+                                int filenameStart = sectionType.IndexOf("filename=", StringComparison.Ordinal) + 10;
+                                int filenameLength = sectionType.IndexOf("\"", filenameStart, StringComparison.Ordinal) - filenameStart;
                                 string filename = sectionType.Substring(filenameStart, filenameLength);
 
                                 int[] contentBegin = clientRequestData.Locate("\r\n\r\n", dataOffset);
