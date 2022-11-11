@@ -3,9 +3,9 @@ using RestEasy.Web.HTML;
 namespace Application.Web.Tags;
 
 public class ValueAs : Tag {
-    public override string startTag() {
-        string property = this.GetProperty("name");
-        string value = (property != null && property.StartsWith("@")) ? this.GetProperty(property) ?? "" : this.GetProperty("name") ?? "";
+    public override string StartTag() {
+        string property = GetProperty("name");
+        string value = (property != null && property.StartsWith("@")) ? GetProperty(property) ?? "" : GetProperty("name") ?? "";
 
         string? tag = GetProperty("data-tag").ToLower();
         string response = "<" + tag + " ";
@@ -33,7 +33,7 @@ public class ValueAs : Tag {
         return response;
     }
 
-    public override string endTag() {
+    public override string EndTag() {
         string? tag = GetProperty("data-tag").ToLower();
         if (tag.Equals("img")) return "/>";
         else return "</" + tag + ">";

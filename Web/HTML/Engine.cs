@@ -2,18 +2,18 @@ using System.Text;
 
 namespace RestEasy.Web.HTML;
 
-public class Engine {
-    private static Dictionary<string, Type> _registeredClasses = new Dictionary<string, Type>();
+public static class Engine {
+    private static readonly Dictionary<string, Type> RegisteredClasses = new Dictionary<string, Type>();
     private static string _namespace = "server";
 
     public static void SetNamespace(string name){
         _namespace = name;
     }
 
-    public static void Add(string name, Type _type){
+    public static void Add(string name, Type type){
         if (_namespace.Length == 0) throw new InvalidOperationException("can't register type without namespace");
         string key = _namespace + ":" + name;
-        if (!_registeredClasses.ContainsKey(key)) _registeredClasses.Add(key, _type);
+        if (!RegisteredClasses.ContainsKey(key)) RegisteredClasses.Add(key, type);
     }
 
     private static string ReadFile(string file){
@@ -21,24 +21,24 @@ public class Engine {
         return "";
     }
 
-    private static List<string> ReadParamters(string line){
+    private static List<string> ReadParameters(string line){
         List<string> parameters = new List<string>();
         int offset = 0;
         line = line.Replace("'", "\"");
 
-        while (offset != -1){
-            offset = line.IndexOf("=", offset);
+        while (true){
+            offset = line.IndexOf("=", offset, StringComparison.Ordinal);
             if (offset == -1){
                 break;
             }
 
             int start = 0; // line.IndexOf(" ");
-            if (start == -1 || start > offset){
+            if (start > offset){
                 start = 0;
             }
 
-            int firstMark = line.IndexOf("\"", offset);
-            int lastMark = line.IndexOf("\"", firstMark + 1);
+            int firstMark = line.IndexOf("\"", offset, StringComparison.Ordinal);
+            int lastMark = line.IndexOf("\"", firstMark + 1, StringComparison.Ordinal);
 
             if (firstMark == -1 || lastMark == -1){
                 break;
@@ -53,12 +53,12 @@ public class Engine {
         return parameters;
     }
 
-    private static Tag? ProccessTag(string code, Dictionary<string, string?> predefinedValues){
-        int keyOffset = code.IndexOf(":");
+    private static Tag? ProcessTag(string code, Dictionary<string, string?> predefinedValues){
+        int keyOffset = code.IndexOf(":", StringComparison.Ordinal);
         Tag? htmlTag = null;
-        int classEndIndex = code.IndexOf(" ", keyOffset);
+        int classEndIndex = code.IndexOf(" ", keyOffset, StringComparison.Ordinal);
         if (classEndIndex == -1){
-            classEndIndex = code.IndexOf(">", keyOffset);
+            classEndIndex = code.IndexOf(">", keyOffset, StringComparison.Ordinal);
         }
 
         string clsKey = code.Substring(1, classEndIndex-1);
@@ -69,7 +69,7 @@ public class Engine {
             }
 
             Dictionary<string, string?> properties = new Dictionary<string, string?>();
-            List<string> propertyKeys = ReadParamters(propertiesString);
+            List<string> propertyKeys = ReadParameters(propertiesString);
             foreach (string property in propertyKeys){
                 if (!property.Contains("=")){
                     continue;
@@ -91,12 +91,10 @@ public class Engine {
                 properties.Add(key, value);
             }
                      
-            if (_registeredClasses.ContainsKey(clsKey)){
-                htmlTag = (Tag)Activator.CreateInstance(_registeredClasses[clsKey])!;
-                if (htmlTag != null){
-                    htmlTag.addProperties(properties);
-                    htmlTag.addProperties(predefinedValues);
-                }
+            if (RegisteredClasses.ContainsKey(clsKey)){
+                htmlTag = (Tag)Activator.CreateInstance(RegisteredClasses[clsKey])!;
+                htmlTag.AddProperties(properties);
+                htmlTag.AddProperties(predefinedValues);
             }
         } catch (Exception e){
             Console.WriteLine("ProcessTag Exception: " + e);
@@ -105,54 +103,54 @@ public class Engine {
         return htmlTag;
     }
 
-    private static string ProcessHTML(string code, Dictionary<string, string?> properties,
+    private static string ProcessHtml(string code, Dictionary<string, string?> properties,
         Dictionary<string, object> resources){
         int offset = 0;
-        int lastOffset = 0;
+        int lastOffset;
         string prefix = "<" + _namespace + ":";
         string prefixEnd = "</" + _namespace + ":";
-        string parseHTML = "";
+        string parseHtml = "";
 
         while (offset != -1){
             lastOffset = offset;
-            offset = code.IndexOf(prefix, offset);
+            offset = code.IndexOf(prefix, offset, StringComparison.Ordinal);
             if (offset == -1 && lastOffset > 0){
                 if (lastOffset < code.Length){
-                    parseHTML += code.Substring(lastOffset);
+                    parseHtml += code.Substring(lastOffset);
                 }
             }
 
             if (offset >= 0){
                 if (lastOffset != offset){
-                    parseHTML += code.Substring(lastOffset, offset-lastOffset);
+                    parseHtml += code.Substring(lastOffset, offset-lastOffset);
                 }
 
-                int tagEndIndex = code.IndexOf(">", offset);
+                int tagEndIndex = code.IndexOf(">", offset, StringComparison.Ordinal);
                 string tagData = code.Substring(offset,  (tagEndIndex + 1) - offset);
                 if (tagData.Contains("/")){
-                    Tag? proccessTag = ProccessTag(tagData, properties);
+                    Tag? proccessTag = ProcessTag(tagData, properties);
                     if (proccessTag != null){
-                        proccessTag.addResource(resources);
-                        parseHTML += proccessTag.startTag() + proccessTag.endTag();
+                        proccessTag.AddResource(resources);
+                        parseHtml += proccessTag.StartTag() + proccessTag.EndTag();
                     }
 
                     offset = tagEndIndex + 1;
                 } else{
-                    int endingTagOffset = code.IndexOf(prefixEnd, tagEndIndex);
+                    int endingTagOffset = code.IndexOf(prefixEnd, tagEndIndex, StringComparison.Ordinal);
                     if (endingTagOffset != -1){
-                        int endTagEndIndex = code.IndexOf(">", endingTagOffset);
+                        int endTagEndIndex = code.IndexOf(">", endingTagOffset, StringComparison.Ordinal);
                         
-                        string innerHTML = code.Substring(tagEndIndex + 1, endingTagOffset -(tagEndIndex +1));
+                        string innerHtml = code.Substring(tagEndIndex + 1, endingTagOffset -(tagEndIndex +1));
 
-                        Tag? proccessTag = ProccessTag(tagData, properties);
+                        Tag? proccessTag = ProcessTag(tagData, properties);
                         if (proccessTag != null){
-                            proccessTag.addResource(resources);
-                            parseHTML += proccessTag.startTag();
+                            proccessTag.AddResource(resources);
+                            parseHtml += proccessTag.StartTag();
                         }
 
-                        parseHTML += ProcessHTML(innerHTML, properties, resources);
+                        parseHtml += ProcessHtml(innerHtml, properties, resources);
                         if (proccessTag != null){
-                            parseHTML += proccessTag.endTag();
+                            parseHtml += proccessTag.EndTag();
                         }
 
                         offset = endTagEndIndex + 1;
@@ -163,17 +161,17 @@ public class Engine {
             }
         }
 
-        if (parseHTML.Trim() == ""){
+        if (parseHtml.Trim() == ""){
             return code;
         }
-        return parseHTML;
+        return parseHtml;
     }
 
     public static string Process(string file, Dictionary<string, string?> properties,
         Dictionary<string, object> resources){
-        string filedata = ReadFile(file);
-        string parseHTML = ProcessHTML(filedata, properties, resources);
-        return parseHTML.Trim();
+        string fileData = ReadFile(file);
+        string parseHtml = ProcessHtml(fileData, properties, resources);
+        return parseHtml.Trim();
     }
 
     public static string Process(string file){
@@ -181,6 +179,6 @@ public class Engine {
     }
 
     private static string ProcessHTML(string code){
-        return ProcessHTML(code, new Dictionary<string, string?>(), new Dictionary<string, object>());
+        return ProcessHtml(code, new Dictionary<string, string?>(), new Dictionary<string, object>());
     }
 }

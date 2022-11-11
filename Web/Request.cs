@@ -24,9 +24,9 @@ namespace RestEasy.Web {
 
         public Request(Socket? clientSocket, string serverName, byte[] clientRequestData)
         {
-            if (clientSocket == null) return;
+            if (clientSocket == null || clientSocket.RemoteEndPoint == null) return;
             try {
-                string[] clientInfo = clientSocket.RemoteEndPoint.ToString().Split(":");
+                string[] clientInfo = clientSocket.RemoteEndPoint.ToString()!.Split(":");
                 ClientIP = clientInfo[0];
                 if (clientInfo.Length > 1) ClientPort = Int32.Parse(clientInfo[1]);
                 
@@ -90,7 +90,7 @@ namespace RestEasy.Web {
                         if (keyValue[0].Trim().ToLower().Equals("content-type")) ContentType = keyValue[1];
                         Headers.Add(keyValue[0], keyValue[1]);
                         if (keyValue[0].Trim().ToLower().Equals("host")) {
-                            if (keyValue[1].Trim().Contains(".")) {
+                            if (keyValue[1].Trim().Split(".").Length > 2) {
                                 Headers.Add("SubDomain", keyValue[1].Trim().Substring(0,keyValue[1].Trim().IndexOf(".", StringComparison.Ordinal) -1));
                             }
                         }

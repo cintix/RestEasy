@@ -18,25 +18,26 @@ public class WebSocket
     private static string _serverName = "localhost";
 
     
-    public WebSocket(int port) {
+    public WebSocket(int port, IPEndPoint localEndPoint) {
         _serverName = Dns.GetHostName();
         _ipAddress = IPAddress.Any;
         _localEndPoint = new IPEndPoint(_ipAddress, port);
     }
 
-    public WebSocket(string hostOrIP, int port) {
+    public WebSocket(string hostOrIp, int port, IPEndPoint localEndPoint) {
+        _localEndPoint = localEndPoint;
         IPHostEntry host;
-        if (hostOrIP == "0.0.0.0") {
+        if (hostOrIp == "0.0.0.0") {
             _serverName = Dns.GetHostName();
             _ipAddress = IPAddress.Any;
         } else {
-            _serverName = hostOrIP;
-            host = Dns.GetHostEntry(hostOrIP);
+            _serverName = hostOrIp;
+            host = Dns.GetHostEntry(hostOrIp);
             _ipAddress = host.AddressList[0];
         }        
     }
 
-    public WebSocket(string hostOrIP, int port, int connections) {
+    public WebSocket(string hostOrIP, int port, int connections, IPEndPoint localEndPoint) {
         IPHostEntry host;
         if (hostOrIP == "0.0.0.0") {
             _serverName = Dns.GetHostName();
@@ -48,6 +49,7 @@ public class WebSocket
         }
 
         this._maxConnections = connections;
+        _localEndPoint = localEndPoint;
     }
     
     public bool IsRunning(){
